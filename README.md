@@ -53,7 +53,8 @@ The utility dynamically loads these functions from **FirewallAPI.dll**, ensuring
   ```powershell
   AppSandBox.exe
   ```
-## 📄 Example Outpu
+## 📄 Example Output
+```powershell
 Found 5 AppContainers:
 --------------------------------------------
 Container 1:
@@ -67,7 +68,7 @@ Container 1:
 --------------------------------------------
 Container 2:
   ...
-
+```
 ## ⚠️ Notes
 
 Requires Windows with AppContainer support.
