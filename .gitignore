@@ -1,0 +1,27 @@
+@"
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+*.ilk
+*.pdb
+*.obj
+*.exe
+*.dll
+*.lib
+
+# NuGet packages
+packages/
+*.nupkg
+
+# VS cache/files
+.vs/
+"@
