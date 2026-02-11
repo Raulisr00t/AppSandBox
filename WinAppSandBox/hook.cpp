@@ -7,16 +7,12 @@
 #pragma comment(lib, "detours.lib")
 #pragma comment(lib, "advapi32.lib")
 
-// ============================================================================
-// GLOBAL STATE DEFINITIONS
-// ============================================================================
+
 HANDLE g_hLogPipe = INVALID_HANDLE_VALUE;
 CRITICAL_SECTION g_csLog;
 BOOL g_bHooksActive = FALSE;
 
-// ============================================================================
-// LOGGING IMPLEMENTATION
-// ============================================================================
+
 void LogApi(LPCSTR module, LPCSTR func) {
     LogApi(module, func, "");
 }
@@ -45,10 +41,6 @@ void LogApi(LPCSTR module, LPCSTR func, LPCSTR fmt, ...) {
     LeaveCriticalSection(&g_csLog);
 }
 
-// ============================================================================
-// HOOK FUNCTION POINTERS (definitions)
-// ============================================================================
-// File Operations
 HANDLE(WINAPI* Real_CreateFileW)(
     LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE) = nullptr;
 BOOL(WINAPI* Real_ReadFile)(
@@ -57,30 +49,24 @@ NTSTATUS(NTAPI* Real_NtCreateFile)(
     PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK,
     PLARGE_INTEGER, ULONG, ULONG, ULONG, ULONG, PVOID, ULONG) = nullptr;
 
-// Process/Thread
 BOOL(WINAPI* Real_CreateProcessW)(
     LPCWSTR, LPWSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES,
     BOOL, DWORD, LPVOID, LPCWSTR, LPSTARTUPINFOW, LPPROCESS_INFORMATION) = nullptr;
 NTSTATUS(NTAPI* Real_NtOpenProcess)(
     PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PCLIENT_ID) = nullptr;
 
-// Memory
 LPVOID(WINAPI* Real_VirtualAlloc)(
     LPVOID, SIZE_T, DWORD, DWORD) = nullptr;
 BOOL(WINAPI* Real_WriteProcessMemory)(
     HANDLE, LPVOID, LPCVOID, SIZE_T, SIZE_T*) = nullptr;
 
-// Registry
 LSTATUS(WINAPI* Real_RegSetValueExW)(
     HKEY, LPCWSTR, DWORD, DWORD, CONST BYTE*, DWORD) = nullptr;
 
-// Network
 int (WINAPI* Real_connect)(
     SOCKET, const struct sockaddr*, int) = nullptr;
 
-// ============================================================================
-// HOOK IMPLEMENTATIONS
-// ============================================================================
+
 static HANDLE WINAPI Hooked_CreateFileW(
     LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
     LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
@@ -198,9 +184,6 @@ static int WINAPI Hooked_connect(
     return ret;
 }
 
-// ============================================================================
-// HOOK INSTALLATION / CLEANUP
-// ============================================================================
 void InstallHooks() {
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
@@ -303,11 +286,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved) {
             return FALSE;
         }
 
-        // Suspend other threads ONLY if multi-threaded process
         DWORD myTid = GetCurrentThreadId();
         DWORD myPid = GetCurrentProcessId();
         HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-        DWORD threadCount = 1;  // Count ourselves
+        DWORD threadCount = 1; 
 
         if (hSnap != INVALID_HANDLE_VALUE) {
             THREADENTRY32 te = { sizeof(THREADENTRY32) };
@@ -338,10 +320,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved) {
             }
         }
 
-        // Install hooks AFTER suspending threads
         InstallHooks();
 
-        // Resume threads if we suspended them
         if (threadCount > 1) {
             hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
             if (hSnap != INVALID_HANDLE_VALUE) {
