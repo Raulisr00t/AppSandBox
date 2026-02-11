@@ -9,6 +9,7 @@
 
 #include "Logger.h"
 #include "EtwMonitor.h"
+#include "hook.h"
 
 #pragma comment(lib, "userenv.lib")
 #pragma comment(lib, "advapi32.lib")
