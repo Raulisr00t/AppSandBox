@@ -116,9 +116,7 @@ static PSID CreateOrGetAppContainerSid(const std::wstring& containerName, bool f
     PSID pAppContainerSid = nullptr;
 
     if (forceRecreate)
-    {
         DeleteAppContainerProfileIfExists(containerName);
-    }
 
     HRESULT hr = DeriveAppContainerSidFromAppContainerName(containerName.c_str(), &pAppContainerSid);
 
@@ -153,12 +151,12 @@ static PSID CreateOrGetAppContainerSid(const std::wstring& containerName, bool f
             return nullptr;
         }
     }
+        
     else
-    {
         std::wcout << L"[+] Using existing AppContainer profile: " << containerName << L"\n";
-    }
 
     LPWSTR sidString = nullptr;
+    
     if (ConvertSidToStringSidW(pAppContainerSid, &sidString))
     {
         std::wcout << L"[+] AppContainer SID: " << sidString << L"\n";
@@ -168,7 +166,6 @@ static PSID CreateOrGetAppContainerSid(const std::wstring& containerName, bool f
     return pAppContainerSid;
 }
 
-
 static int LaunchInAppContainer(
     const std::wstring& commandLine,
     PSID appContainerSid)
@@ -176,6 +173,7 @@ static int LaunchInAppContainer(
     // Set up security capabilities
     SECURITY_CAPABILITIES secCaps{};
     SecureZeroMemory(&secCaps, sizeof(secCaps));
+
     secCaps.AppContainerSid = appContainerSid;
     secCaps.Capabilities = nullptr;
     secCaps.CapabilityCount = 0;
@@ -261,6 +259,7 @@ static int LaunchInAppContainer(
     // Cleanup
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
+    
     DeleteProcThreadAttributeList(attrList);
     HeapFree(GetProcessHeap(), 0, attrList);
 
